@@ -84,7 +84,7 @@ def handle_client(client_socket):
                         voltage = math.floor((float(message.strip().lstrip('\ufeff'))) * 1024)
                         dac.raw_value = voltage  # Set the DAC output
                         a = float(message.strip().lstrip('\ufeff'))
-                        print(f'{voltage} ******')
+                        print(f'{voltage} **x****')
                         # Read Sthe voltage from the ADC
                         current_voltage = chan.voltage
                         print(f"ADC Voltage: {chan.voltage:.2f} V")
