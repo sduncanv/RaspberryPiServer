@@ -36,11 +36,12 @@ def remap_voltage(adc_value, adc_max_value=1023, input_max_voltage=3.18, output_
 
 # Function to handle client connections
 def handle_client(client_socket):
+    SLIDER_VALUE = " "
+    REMAPPED_VOLTAGE_VALUE = " "
     with client_socket:
         print(f"New connection from {client_socket.getpeername()}")
         buffer = ""
         Color = False
-        
 
         try:
             while True:
@@ -58,12 +59,12 @@ def handle_client(client_socket):
                 buffer = messages.pop()
 
                 for message in messages:
-                    print(f"Received: {message.strip()}")
-
                     if message.strip() == "Ping":
                         response = "Pong"
+                        print('+')
 
                     elif message.strip() == "Data":
+                        print('++')
                         # Read the voltage from the ADS1015 sensor
                         current_voltage = chan.voltage
                         print(f"ADC Voltage: {current_voltage:.2f} V")
@@ -75,16 +76,23 @@ def handle_client(client_socket):
                         # Send the response with the voltage data
                         response = f"ADC Voltage: {current_voltage:.2f} V; Remapped Voltage: {remapped_voltage:.2f} V"
 
+                    elif message.strip().lstrip('\ufeff') == "GET_STATE":
+                        print(f"1. response ----------> {'STATE'};{REMAPPED_VOLTAGE_VALUE};{SLIDER_VALUE}")
+                        response = f"{'STATE'};{REMAPPED_VOLTAGE_VALUE};{SLIDER_VALUE}" + "\n"
+                        print(f'2. response ----------> {response}')
+
                     elif len(message.strip()) <= 4 and len(message.strip()) >= 1:
+                        print('++++')
+
                         # Process numeric message to adjust DAC output and read ADC
                         response = "[Server] Received: " + message + "\n"
                         print('Setting voltage based on received message!')
 
                         # Set the voltage in DAC based on the received value
-                        voltage = math.floor((float(message.strip().lstrip('\ufeff'))) * 1024)
+                        voltage = math.floor((float(message.strip().lstrip('\ufeff'))*10*50))+600
                         dac.raw_value = voltage  # Set the DAC output
-                        a = float(message.strip().lstrip('\ufeff'))
-                        print(f'{voltage} **x****')
+                        SLIDER_VALUE = float(message.strip().lstrip('\ufeff'))
+                        print(f"SLIDER_VALUE ----------> {SLIDER_VALUE}")
                         # Read Sthe voltage from the ADC
                         current_voltage = chan.voltage
                         print(f"ADC Voltage: {chan.voltage:.2f} V")
@@ -92,11 +100,13 @@ def handle_client(client_socket):
                         # Remap the voltage
                         #remapped_voltage = remap_voltage(current_voltage * 2048 / 3.3)  # Assuming 3.3V system
                         remapped_voltage = 0
-                        print(f"Remapped Voltage: {remapped_voltage:.2f} V")
+                        REMAPPED_VOLTAGE_VALUE = remapped_voltage
+                        # print(f": {remapped_voltage:.2f} V")
+                        print(f"REMAPPED_VOLTAGE_VALUE ----------> {REMAPPED_VOLTAGE_VALUE}")
 
                         # Send the response with the ADC and DAC data
-                        response = f"{a:.2f};{remapped_voltage:.2f}"+ "\n"
-                        print(f'response: {response}')
+                        response = f"{remapped_voltage:.2f};{SLIDER_VALUE:.2f}"+ "\n"
+                        print(f'response ----------> {response}')
                         # Get current datetime
                         formatted_date = get_current_datetime()
                         
@@ -106,13 +116,14 @@ def handle_client(client_socket):
                             #'Voltage': message.strip(),
                             #'Distance': (chan.voltage*14.235+8.6188)/10
                         #}
-                        print((chan.voltage*14.235+8.6188)/10)
+                        print("hola:",(chan.voltage*14.235+8.6188)/10)
                         print(chan.voltage)
 
                     # Upload data to Firebase
                         # this is Marvin, Why aren t you in the lab?
                         #write_something_data(formatted_date, holo_data)
                     else:
+                        print('+++++')
                         #response = "[Server] Received: no string :" + message + "\n"
                         response = ""+ "\n"
 
@@ -155,3 +166,4 @@ def start_server():
 
 if __name__ == "__main__":
     start_server()
+
