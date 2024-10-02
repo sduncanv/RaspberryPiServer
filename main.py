@@ -164,7 +164,7 @@ def start_server():
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind((HOST, PORT))
         server_socket.listen(5)
-        print(f"Server listening on {HOST}:{PORT}")
+        print(f"Serverr listening on {HOST}:{PORT}")
 
         while True:
             client_socket, addr = server_socket.accept()
