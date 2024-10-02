@@ -29,6 +29,9 @@ ads.gain = 1
 HOST = "128.46.87.232" # Server IP
 PORT = 9061
 
+SLIDER_VALUE = 0
+REMAPPED_VOLTAGE_VALUE = 0
+
 # Function to remap the ADC voltage
 def remap_voltage(adc_value, adc_max_value=1023, input_max_voltage=3.18, output_min=0.318, output_max=1.06):
 
@@ -39,8 +42,8 @@ def remap_voltage(adc_value, adc_max_value=1023, input_max_voltage=3.18, output_
 
 # Function to handle client connections
 def handle_client(client_socket):
-    SLIDER_VALUE = ""
-    REMAPPED_VOLTAGE_VALUE = ""
+    global SLIDER_VALUE
+    global REMAPPED_VOLTAGE_VALUE
 
     with client_socket:
 
