@@ -40,10 +40,13 @@ def remap_voltage(adc_value, adc_max_value=1023, input_max_voltage=3.18, output_
 
     return output_voltage
 
+connected_clients = [] # Lista para almacenar los clientes conectados
+
 # Function to handle client connections
 def handle_client(client_socket):
     global SLIDER_VALUE
     global REMAPPED_VOLTAGE_VALUE
+    connected_clients.append(client_socket)
 
     with client_socket:
 
@@ -65,6 +68,10 @@ def handle_client(client_socket):
                 buffer += data
                 messages = buffer.split("\n")
                 buffer = messages.pop()
+                
+                for client in connected_clients:
+                    if client != client_socket:
+                        client.sendall(data.encode('utf-8'))
 
                 for message in messages:
 
@@ -91,6 +98,7 @@ def handle_client(client_socket):
                         print(f'2. response ----------> {response}')
 
                     elif len(message.strip()) <= 4 and len(message.strip()) >= 1:
+                        print(f"----- {message}")
 
                         # Process numeric message to adjust DAC output and read ADC
                         response = "[Server] Received: " + message + "\n"
@@ -164,7 +172,7 @@ def start_server():
         server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         server_socket.bind((HOST, PORT))
         server_socket.listen(5)
-        print(f"Serverr listening on {HOST}:{PORT}")
+        print(f"Server listening on {HOST}:{PORT}")
 
         while True:
             client_socket, addr = server_socket.accept()
@@ -174,3 +182,5 @@ def start_server():
 
 if __name__ == "__main__":
     start_server()
+
+
